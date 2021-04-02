@@ -2,19 +2,19 @@
 
 ## Specification
 
-### `(make-box-comparator type-test unboxer contents-comparator)` (Procedure)
+### `(make-wrapper-comparator type-test unwrap contents-comparator)` (Procedure)
 
-Returns a comparator which compares values satisfying the predicate `type-test` by first calling the given `unboxer` procedure on them, then comparing the output of that procedure with the given `contents-comparator.` The hash function of the box comparator returns the same value as the `contents-comparator` run on the unboxed value.
+Returns a comparator which compares values satisfying the predicate `type-test` by first calling the given `unwrap` procedure on them, then comparing the output of that procedure with the given `contents-comparator.` The hash function of the wrapper comparator returns the same value as the `contents-comparator` run on the unwrapped value.
 
 ### `(make-composed-comparator type-test comparator ...)` (Procedure)
 
 Returns a comparator which compares values satisfying the given predicate `type-test` by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the composed comparator also considers them equal. The hash function of the composed comparator hashes together the results of all the given comparators in an implementation-defined way.
 
-### `(compose-comparator type-test (unboxer comparator) ...)` (Syntax)
+### `(compose-comparator type-test (unwrap comparator) ...)` (Syntax)
 
-Expands to a form which returns a comparator which compares values satisfying the given predicate `type-test` by running in turn, left to right, box comparators made out of the given `unboxer` and `comparator`, according to the rules for `make-composed-comparator`. `comparator` may be omitted from each form, in which case the SERFI 128 default comparator is used.
+Expands to a form which returns a comparator which compares values satisfying the given predicate `type-test` by running in turn, left to right, wrapper comparators made out of the given `unwrap` and `comparator`, according to the rules for `make-composed-comparator`. `comparator` may be omitted from each form, in which case the SRFI 128 default comparator is used.
 
-This is equivalent to using the procedural forms `make-composed-comparator` and `make-box-comparator` together, but can be slightly more efficient because it only needs to run the given `type-test` predicate once, whereas composing a number of `make-box-comparator`s would run each box comparator’s type test once for each comparator in the composed comparator.
+This is equivalent to using the procedural forms `make-composed-comparator` and `make-wrapper-comparator` together, but can be slightly more efficient because it only needs to run the given `type-test` predicate once, whereas composing a number of `make-wrapper-comparator`s would run each wrapper comparator’s type test once for each comparator in the composed comparator.
 
 ## Examples
 
