@@ -14,7 +14,7 @@ Returns a comparator which compares values satisfying the given predicate `type-
 
 Expands to a form which returns a comparator which compares values satisfying the given predicate `type-test` by running in turn, left to right, wrapper comparators made out of the given `unwrap` and `comparator`, according to the rules for `make-composed-comparator`. `comparator` may be omitted from each form, in which case the SRFI 128 default comparator is used.
 
-This is equivalent to using the procedural forms `make-composed-comparator` and `make-wrapper-comparator` together, but can be slightly more efficient because it only needs to run the given `type-test` predicate once, whereas composing a number of `make-wrapper-comparator`s would run each wrapper comparator’s type test once for each comparator in the composed comparator.
+This is equivalent to using the procedural forms `make-composed-comparator` and `make-wrapper-comparator` together.
 
 ## Examples
 
