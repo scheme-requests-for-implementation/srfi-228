@@ -4,7 +4,7 @@
 
 ### `(make-wrapper-comparator type-test unwrap contents-comparator)` (Procedure)
 
-Returns a comparator which compares values satisfying the predicate `type-test` by first calling the given `unwrap` procedure on them, then comparing the output of that procedure with the given `contents-comparator.` The hash function of the wrapper comparator returns the same value as the `contents-comparator` run on the unwrapped value.
+Returns a comparator which compares values satisfying the predicate `type-test` by first calling the given `unwrap` procedure on them, then comparing the output of that procedure with the given `contents-comparator`. The hash function of the wrapper comparator returns the same value as the `contents-comparator` run on the unwrapped value.
 
 ### `(make-composed-comparator type-test comparator ...)` (Procedure)
 
