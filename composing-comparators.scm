@@ -31,7 +31,7 @@
            (let loop ((cmp (gen)))
              (cond ((eof-object? cmp) #f)
                    (((comparator-ordering-predicate cmp) a b) #t)
-                   (((comparator-equality-predicate cmp) b a) (loop (gen)))
+                   (((comparator-equality-predicate cmp) a b) (loop (gen)))
                    (else #f)))))
        #f)
    (if (every comparator-hash-function comparators)
