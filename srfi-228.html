@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SRFI 228: A further comparator library</title>
+  <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png">
+  <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
+  <style>
+    .issue {
+    background-color: pink;
+    padding: 0.5em;
+    }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body>
+<h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" alt="SRFI surfboard logo" /></a>228: A further comparator library</h1>
+
+<p>by Daphne Preston-Kendal</p>
+
+<h2 id="status">Status</h2>
+
+<p>??? the draft/final/withdrawn status of the SRFI, information on how
+  to subscribe to its mailing list, and important dates in its history.
+  The editor will add this section.</p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p>Further procedures and syntax forms for defining <a href="https://srfi.schemers.org/srfi-128/srfi-128.html">SRFI 128</a> comparators, and for extracting comparison procedures similar to those defined for Scheme’s built-in types using them.
+
+<p>Best enjoyed in combination with <a href="https://srfi.schemers.org/srfi-162/srfi-162.html">SRFI 162</a>.
+
+<h2 id="issues">Issues</h2>
+
+<p class=issue>Outstanding issues are noted inline, denoted by a highlighted background.
+
+<h2 id="rationale">Rationale</h2>
+
+<p>A typical pattern for defining comparison behaviour for record types and other user-defined Scheme types is some form of lexicographical order over their member slots. The comparator abstraction of SRFI 128 has useful potential for reducing the code bulk of defining such comparison behaviours: this library is intended to take advantage of that potential.
+
+<h2 id="specification">Specification</h2>
+
+<p>All identifiers defined in this SRFI are exported in the <code>(srfi 228)</code> library. However, as in the case of SRFI 162, it is hoped and intended that they will simply be added to the existing comparator libraries of RnRSes and Scheme implementations, rather than being in a separate library.
+
+<dl>
+  <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>unwrap</var> <var>contents-comparator</var><code>)</code> (Procedure)
+    <dd>
+      <p>Returns a comparator which compares values satisfying the predicate <var>type-test</var> by first calling the given <var>unwrap</var> procedure on them, then comparing the output of that procedure with the given <var>contents-comparator</var>. The hash function of the wrapper comparator returns the same value as the <var>contents-comparator</var> run on the unwrapped value.</p>
+
+  <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
+    <dd>
+      <p>Returns a comparator which compares values satisfying the given predicate <covarde>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the composed comparator also considers them equal. The hash function of the composed comparator hashes together the results of all the given comparators in an implementation-defined way.</p>
+
+  <dt><code>(compose-comparator</code> <var>type-test</var> <code>(</code><var>unwrap</var> <var>comparator</var><code>)</code> ...)</code> (Syntax)
+    <dd>
+      <p>Expands to a form which returns a comparator which compares values satisfying the given predicate <code>type-test</code> by running in turn, left to right, wrapper comparators made out of the given <code>unwrap</code> and <code>comparator</code>, according to the rules for <code>make-composed-comparator</code>. <code>comparator</code> may be omitted from each form, in which case the SRFI 128 default comparator is used.</p>
+      <p>This is equivalent to using the procedural forms <code>make-composed-comparator</code> and <code>make-wrapper-comparator</code> together.</p>
+
+  <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
+    <dd>
+      <p>Returns five values, variadic procedures corresponding to <code>&lt;</code>, <code>&lt;=</code>, <code>=</code>, <code>&gt;=</code>, and <code>&gt;</code> respectively for the given comparator. Each one is equivalent to a partial application of the SRFI 128 procedures <code>&lt;?</code>, <code>&lt;=?</code>, <code>=?</code>, <code>&gt;=?</code>, and <code>&gt;?</code> with the given comparator.</p>
+      <p class=issue>This is admittedly a rather large number of return values. I hope that that R7RS will adopt some kind of keyword argument system, capable of being extended to keyword return values, and that it will then be possible to redefine <code>comparison-procedures</code> to return procedures associated with keyword names to make the order irrelevant and code using this procedure less opaque. In the meanwhile …?</p>
+      <p class=issue>As long as we’re stuck with positional return values, I should note that this isn’t the order usually used for the specification of comparison procedures (e.g. the <code>char*?</code> family in R7RS small uses the order <code>char=?</code>, <code>char&lt;?</code>, <code>char&gt;?</code>. <code>char&lt;=?</code>, <code>char&gt;=?</code>). I find the order here easier to remember, but perhaps it would be better to switch to that order for consistency.</p>
+</dl>
+
+<p class=issue>I’d also like to provide a constructor for comparators which work on any iterable collection type (à la SRFI 158 generators). My initial plan was to use fold procedures for this, but that doesn’t actually work. Generator comparators seems like a better approach.</p>
+
+<h2 id=examples>Examples</h2>
+
+<p><code>make-pair-comparator</code> from SRFI 128 can be implemented in terms of this library as follows:</p>
+<pre><code class="language-scheme">(define (make-pair-comparator car-comparator cdr-comparator)
+  (compose-comparator pair? (car car-comparator) (cdr cdr-comparator)))
+</code></pre>
+<p>If one has defined a date record type consisting of year, month, and day fields such as:</p>
+<pre><code class="language-scheme">(define-record-type &lt;date&gt;
+  (make-date year month day)
+  date?
+  (year date-year)
+  (month date-month)
+  (day date-day))
+</code></pre>
+<p>these can be correctly compared by a comparator defined by:</p>
+<pre><code class="language-scheme">(compose-comparator date?
+  (date-year)  ;; Equivalent to (date-year (make-default-comparator))
+  (date-month)
+  (date-day))
+</code></pre>
+<p>And monomorphic comparison procedures matching those provided for Scheme’s built-in types can be defined by:</p>
+<pre><code class="language-scheme">(define-values (date&lt;? date&lt;=? date=? date&gt;=? date&gt;?)
+  (comparison-procedures the-date-comparator-above))
+</code></pre>
+
+<h2 id="implementation">Implementation</h2>
+
+<p>A portable sample implementation and test suite for R7RS may be found in the repository for this SRFI.
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+
+<p class=issue>Thanks in advance to all who will contribute to this SRFI mailing list. I hope to list you by name with your contributions here when this SRFI approaches finalization.</p>
+
+<h2 id="copyright">Copyright</h2>
+<p>&copy; 2021 Daphne Preston-Kendal.</p>
+
+<p>
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:</p>
+
+<p>
+  The above copyright notice and this permission notice (including the
+  next paragraph) shall be included in all copies or substantial
+  portions of the Software.</p>
+<p>
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.</p>
+
+<hr>
+<address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org">Arthur A. Gleckler</a></address></body></html>

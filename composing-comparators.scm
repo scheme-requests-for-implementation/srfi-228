@@ -21,9 +21,9 @@
    type-test
    (if (every comparator-equality-predicate comparators)
        (lambda (a b)
-         (generator-every (lambda (cmp)
-                            ((comparator-equality-predicate cmp) a b))
-                          (list->generator comparators)))
+         (every (lambda (cmp)
+                  ((comparator-equality-predicate cmp) a b))
+                comparators))
        #f)
    (if (every comparator-ordering-predicate comparators)
        (lambda (a b)
@@ -48,10 +48,27 @@
     ((_ type-test (unwrap . more) ...)
      (make-composed-comparator
       type-test
-      (let ((cmp ((lambda x
-                    (if (null? x) (make-default-comparator)
-                        (car x))) . more)))
+      (let-values (((unwrap cmp) (compose-comparator-form unwrap . more)))
         (make-wrapper-comparator
          (comparator-type-test-predicate cmp)
          unwrap
          cmp)) ...))))
+
+(define-syntax compose-comparator-form
+  ;; Using this submacro enables enforcement of the correct form with
+  ;; moderately more useful syntax errors than doing it the SRFI 9
+  ;; way, at least within the limited bounds of what one can do for
+  ;; that in syntax-rules.
+  (syntax-rules ()
+    ((_ unwrap) (compose-comparator-form unwrap (make-default-comparator)))
+    ((_ unwrap cmp)
+     (values
+      unwrap cmp))))
+
+(define (comparison-procedures comparator)
+  (values
+   (lambda args (apply <? comparator args))
+   (lambda args (apply <=? comparator args))
+   (lambda args (apply =? comparator args))
+   (lambda args (apply >=? comparator args))
+   (lambda args (apply >? comparator args))))

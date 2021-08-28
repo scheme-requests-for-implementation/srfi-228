@@ -1,11 +1,11 @@
-(define-library (srfi 228) ;; SRFI number reserved for, but not yet formally
-                           ;; assigned to this library.
+(define-library (srfi 228)
   (import (srfi 1)
           (srfi 128)
           (srfi 151)
           (srfi 158))
   (export make-wrapper-comparator
           make-composed-comparator
-          compose-comparator)
+          compose-comparator
+          comparison-procedures)
 
   (include "composing-comparators.scm"))
