@@ -45,10 +45,12 @@
   <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>unwrap</var> <var>contents-comparator</var><code>)</code> (Procedure)
     <dd>
       <p>Returns a comparator which compares values satisfying the predicate <var>type-test</var> by first calling the given <var>unwrap</var> procedure on them, then comparing the output of that procedure with the given <var>contents-comparator</var>. The hash function of the wrapper comparator returns the same value as the <var>contents-comparator</var> run on the unwrapped value.</p>
+      <p class=issue>Add example.</p>
 
   <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
       <p>Returns a comparator which compares values satisfying the given predicate <var>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the composed comparator also considers them equal. The hash function of the composed comparator hashes together the results of all the given comparators in an implementation-defined way.</p>
+      <p class=issue>Add example.</p>
 
   <dt><code>(compose-comparator</code> <var>type-test</var> <code>(</code><var>unwrap</var> <var>comparator</var><code>) ...)</code> (Syntax)
     <dd>
