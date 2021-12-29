@@ -43,6 +43,41 @@
                                (list->generator comparators))))
        #f)))
 
+(define (make-sum-comparator . comparators)
+  (make-comparator
+   (lambda (x)
+     (any (lambda (cmp) ((comparator-type-test cmp) x)) comparators))
+   (if (every comparator-equality-predicate comparators)
+       (lambda (a b)
+         (let ((a-cmp-idx (list-index
+                           (lambda (cmp) ((comparator-type-test cmp) a))
+                           comparators))
+               (b-cmp-idx (list-index
+                           (lambda (cmp) ((comparator-type-test cmp) b))
+                           comparators))))
+         (if (not (= a-cmp-idx b-cmp-idx) #f)
+             (let ((cmp (list-ref comparators a-cmp-idx)))
+               ((comparator-equality-predicate cmp) a b))))
+       #f)
+   (if (every comparator-ordering-predicate comparators)
+       (lambda (a b)
+         (let ((a-cmp-idx (list-index
+                           (lambda (cmp) ((comparator-type-test cmp) a))
+                           comparators))
+               (b-cmp-idx (list-index
+                           (lambda (cmp) ((comparator-type-test cmp) b))
+                           comparators)))
+           (cond ((< a-cmp-idx b-cmp-idx) #t)
+                 ((> a-cmp-idx b-cmp-idx) #f)
+                 (else
+                  (let ((cmp (list-ref comparators a-cmp-idx)))
+                    ((comparator-ordering-predicate cmp) a b))))))
+       #f)
+   (if (every comparator-hash-function comparators)
+       (lambda (x)
+         (let ((cmp (find (lambda (cmp) ((comparator-type-test cmp) x)) comparators)))
+           ((comparator-hash-function cmp) x))))))
+
 (define (comparison-procedures comparator)
   (values
    (lambda args (apply <? comparator args))

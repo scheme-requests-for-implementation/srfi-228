@@ -48,7 +48,11 @@
 
   <dt><code>(make-product-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the given predicate <covarde>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the composed comparator also considers them equal. The hash function of the composed comparator hashes together the results of all the given comparators in an implementation-defined way.</p>
+      <p>Returns a comparator which compares values satisfying the given predicate <var>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the product comparator also considers them equal. The hash function of the product comparator hashes together the results of all the given comparators in an implementation-defined way. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
+
+  <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
+    <dd>
+      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
 
   <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
     <dd>
@@ -90,7 +94,9 @@
 
 <h2 id="acknowledgements">Acknowledgements</h2>
 
-<p class=issue>Thanks in advance to all who will contribute to this SRFI mailing list. I hope to list you by name with your contributions here when this SRFI approaches finalization.</p>
+<p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
+
+  <p>Marc Nieper-Wißkirchen suggested useful improvements to the <code>comparison-procedures</code> procedure.
 
 <h2 id="copyright">Copyright</h2>
 <p>&copy; 2021 Daphne Preston-Kendal.</p>
