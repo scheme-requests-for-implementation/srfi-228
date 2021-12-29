@@ -58,12 +58,14 @@
   <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
       <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
+      <p class=issue>Add example.</p>
 
   <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
     <dd>
       <p>Returns five values, variadic procedures corresponding to <code>&lt;</code>, <code>&lt;=</code>, <code>=</code>, <code>&gt;=</code>, and <code>&gt;</code> respectively for the given comparator. Each one is equivalent to a partial application of the SRFI 128 procedures <code>&lt;?</code>, <code>&lt;=?</code>, <code>=?</code>, <code>&gt;=?</code>, and <code>&gt;?</code> with the given comparator.</p>
       <p class=issue>This is admittedly a rather large number of return values. I hope that that R7RS will adopt some kind of keyword argument system, capable of being extended to keyword return values, and that it will then be possible to redefine <code>comparison-procedures</code> to return procedures associated with keyword names to make the order irrelevant and code using this procedure less opaque. In the meanwhile …?</p>
       <p class=issue>As long as we’re stuck with positional return values, I should note that this isn’t the order usually used for the specification of comparison procedures (e.g. the <code>char*?</code> family in R7RS small uses the order <code>char=?</code>, <code>char&lt;?</code>, <code>char&gt;?</code>. <code>char&lt;=?</code>, <code>char&gt;=?</code>). I find the order here easier to remember, but perhaps it would be better to switch to that order for consistency.</p>
+      <p class=issue>Add example.</p>
 </dl>
 
 <h2 id=further-work>Further work</h2>
@@ -72,28 +74,7 @@
 
 <h2 id=examples>Examples</h2>
 
-<p><code>make-pair-comparator</code> from SRFI 128 can be implemented in terms of this library as follows:</p>
-<pre><code class="language-scheme">(define (make-pair-comparator car-comparator cdr-comparator)
-  (compose-comparator pair? (car car-comparator) (cdr cdr-comparator)))
-</code></pre>
-<p>If one has defined a date record type consisting of year, month, and day fields such as:</p>
-<pre><code class="language-scheme">(define-record-type &lt;date&gt;
-  (make-date year month day)
-  date?
-  (year date-year)
-  (month date-month)
-  (day date-day))
-</code></pre>
-<p>these can be correctly compared by a comparator defined by:</p>
-<pre><code class="language-scheme">(compose-comparator date?
-  (date-year)  ;; Equivalent to (date-year (make-default-comparator))
-  (date-month)
-  (date-day))
-</code></pre>
-<p>And monomorphic comparison procedures matching those provided for Scheme’s built-in types can be defined by:</p>
-<pre><code class="language-scheme">(define-values (date&lt;? date&lt;=? date=? date&gt;=? date&gt;?)
-  (comparison-procedures the-date-comparator-above))
-</code></pre>
+<p class=issue>Examples to follow.
 
 <h2 id="implementation">Implementation</h2>
 
@@ -103,7 +84,7 @@
 
 <p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
 
-  <p>Marc Nieper-Wißkirchen suggested useful improvements to the <code>comparison-procedures</code> procedure.
+<p>Marc Nieper-Wißkirchen and John Cowan suggested means of improving the <code>comparison-procedures</code> procedure; as of the current draft, this remains an open issue.
 
 <h2 id="copyright">Copyright</h2>
 <p>&copy; 2021 Daphne Preston-Kendal.</p>
