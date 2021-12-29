@@ -16,7 +16,7 @@
         ((comparator-hash-function contents-comparator) x))
       #f)))
 
-(define (make-composed-comparator type-test . comparators)
+(define (make-product-comparator type-test . comparators)
   (make-comparator
    type-test
    (if (every comparator-equality-predicate comparators)
@@ -42,28 +42,6 @@
                                  ((comparator-hash-function cmp) x))
                                (list->generator comparators))))
        #f)))
-
-(define-syntax compose-comparator
-  (syntax-rules ()
-    ((_ type-test (unwrap . more) ...)
-     (make-composed-comparator
-      type-test
-      (let-values (((unwrap cmp) (compose-comparator-form unwrap . more)))
-        (make-wrapper-comparator
-         (comparator-type-test-predicate cmp)
-         unwrap
-         cmp)) ...))))
-
-(define-syntax compose-comparator-form
-  ;; Using this submacro enables enforcement of the correct form with
-  ;; moderately more useful syntax errors than doing it the SRFI 9
-  ;; way, at least within the limited bounds of what one can do for
-  ;; that in syntax-rules.
-  (syntax-rules ()
-    ((_ unwrap) (compose-comparator-form unwrap (make-default-comparator)))
-    ((_ unwrap cmp)
-     (values
-      unwrap cmp))))
 
 (define (comparison-procedures comparator)
   (values

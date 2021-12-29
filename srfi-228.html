@@ -46,14 +46,9 @@
     <dd>
       <p>Returns a comparator which compares values satisfying the predicate <var>type-test</var> by first calling the given <var>unwrap</var> procedure on them, then comparing the output of that procedure with the given <var>contents-comparator</var>. The hash function of the wrapper comparator returns the same value as the <var>contents-comparator</var> run on the unwrapped value.</p>
 
-  <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
+  <dt><code>(make-product-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
       <p>Returns a comparator which compares values satisfying the given predicate <covarde>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the composed comparator also considers them equal. The hash function of the composed comparator hashes together the results of all the given comparators in an implementation-defined way.</p>
-
-  <dt><code>(compose-comparator</code> <var>type-test</var> <code>(</code><var>unwrap</var> <var>comparator</var><code>)</code> ...)</code> (Syntax)
-    <dd>
-      <p>Expands to a form which returns a comparator which compares values satisfying the given predicate <code>type-test</code> by running in turn, left to right, wrapper comparators made out of the given <code>unwrap</code> and <code>comparator</code>, according to the rules for <code>make-composed-comparator</code>. <code>comparator</code> may be omitted from each form, in which case the SRFI 128 default comparator is used.</p>
-      <p>This is equivalent to using the procedural forms <code>make-composed-comparator</code> and <code>make-wrapper-comparator</code> together.</p>
 
   <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
     <dd>
