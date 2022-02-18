@@ -48,34 +48,97 @@
   <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>unwrap</var> <var>contents-comparator</var><code>)</code> (Procedure)
     <dd>
       <p>Returns a comparator which compares values satisfying the predicate <var>type-test</var> by first calling the given <var>unwrap</var> procedure on them, then comparing the output of that procedure with the given <var>contents-comparator</var>. The hash function of the wrapper comparator returns the same value as the <var>contents-comparator</var> run on the unwrapped value.</p>
-      <p class=issue>Add example.</p>
 
-  <dt><code>(make-product-comparator</code> <var>type-test</var> <var>comparator</var> ... <code>)</code> (Procedure)
+  <dt><code>(make-product-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the given predicate <var>type-test</var> by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the product comparator also considers them equal. The hash function of the product comparator hashes together the results of all the given comparators in an implementation-defined way. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
-      <p class=issue>Is the <var>type-test</var> argument needed? It could easily be defined by <code>(lambda (x) (every (lambda (cmp) ((comparator-type-test cmp) x)) comparators))</code>, by analogy to <code>make-sum-comparator</code>.
-      <p class=issue>Add example.</p>
+      <p>Returns a comparator which compares values satisfying the type tests of all of the given <var>comparator</var>s by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the product comparator also considers them equal. The hash function of the product comparator hashes together the results of all the given comparators in an implementation-defined way. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
 
   <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
-      <p class=issue>Add example.</p>
+      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators, such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
 
   <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
     <dd>
       <p>Returns five values, variadic procedures corresponding to <code>&lt;</code>, <code>&lt;=</code>, <code>=</code>, <code>&gt;=</code>, and <code>&gt;</code> respectively for the given comparator. Each one is equivalent to a partial application of the SRFI 128 procedures <code>&lt;?</code>, <code>&lt;=?</code>, <code>=?</code>, <code>&gt;=?</code>, and <code>&gt;?</code> with the given comparator.</p>
       <p class=issue>This is admittedly a rather large number of return values. I hope that that R7RS will adopt some kind of keyword argument system, capable of being extended to keyword return values, and that it will then be possible to redefine <code>comparison-procedures</code> to return procedures associated with keyword names to make the order irrelevant and code using this procedure less opaque. In the meanwhile …?</p>
       <p class=issue>As long as we’re stuck with positional return values, I should note that this isn’t the order usually used for the specification of comparison procedures (e.g. the <code>char*?</code> family in R7RS small uses the order <code>char=?</code>, <code>char&lt;?</code>, <code>char&gt;?</code>. <code>char&lt;=?</code>, <code>char&gt;=?</code>). I find the order here easier to remember, but perhaps it would be better to switch to that order for consistency.</p>
-      <p class=issue>Add example.</p>
 </dl>
-
-<h2 id=further-work>Further work</h2>
-
-<p>The author hopes that a future SRFI will add a procedure for creating comparators yielding lexicographical order over any sequence type by delegating to a common iteration protocol. An idea to do this using <code>fold</code> procedures foundered on two grounds: the first and more intrinsic one is that <code>fold</code> called on two sequences, one of which is a prefix of the other, cannot determine which of the two is longer, and a sort using <code>fold</code>-based iteration would incorrectly consider them equal; the second is that there is currently an inconsistency among Scheme libraries in what order the <var>kons</var> procedure argument to <code>fold</code> receives the accumulator and the next values in the sequence (compare <a href="https://srfi.schemers.org/srfi-1/srfi-1.html#fold">SRFI 1 <code>fold</code></a> with <a href="https://srfi.schemers.org/srfi-133/srfi-133.html#vector-fold">SRFI 133 <code>vector-fold</code></a>). <a href="https://srfi.schemers.org/srfi-158/srfi-158.html">SRFI 158</a> generators were rejected on the ground that their sequences cannot contain any arbitrary Scheme datum.
 
 <h2 id=examples>Examples</h2>
 
-<p class=issue>Examples to follow.
+<p>Personal names are usually sorted lexicographically and case-insensitively by the last name, then the first name if the last names are the same. The following example shows how <code>make-wrapper-comparator</code> and <code>make-product-comparator</code> can be used to create a comparator which orders a record type of personal names in this way, and how <code>comparison-procedures</code> can then be used for this ordering.
+
+<pre><code>(define-record-type Person
+  (make-person first-name last-name)
+  person?
+  (first-name person-first-name)
+  (last-name person-last-name))
+
+(define person-name-comparator
+  (make-product-comparator
+   (make-wrapper-comparator person? person-last-name string-ci-comparator)
+   (make-wrapper-comparator person? person-first-name string-ci-comparator)))
+
+(define-values (person-name&lt;?
+                person-name&lt;=?
+                person-name=?
+                person-name>?
+                person-name>=?)
+  (comparison-procedures person-name-comparator))
+
+(person-name&lt;? (make-person "John" "Cowan")
+               (make-person "Daphne" "Preston-Kendal")) ;=> #t
+
+(person-name>? (make-person "Tom" "Smith")
+               (make-person "John" "Smith")) ;=> #t</code></pre>
+
+<p>This example can be extended with nested comparators to sort a catalogue in which CDs appear at the end of the list after books:
+
+<pre><code>(define-record-type Book
+  (make-book author title)
+  book?
+  (author book-author)
+  (title book-title))
+
+(define book-comparator
+  (make-product-comparator
+   (make-wrapper-comparator book? book-author person-name-comparator)
+   (make-wrapper-comparator book? book-title string-ci-comparator)))
+
+(define-record-type CD
+  (make-cd artist title)
+  cd?
+  (artist cd-artist)
+  (title cd-title))
+
+(define cd-comparator
+  (make-product-comparator
+   (make-wrapper-comparator cd? cd-artist person-name-comparator)
+   (make-wrapper-comparator cd? cd-title string-ci-comparator)))
+
+(define item-comparator
+  (make-sum-comparator book-comparator cd-comparator))
+
+(define-values (item&lt;?
+                item&lt;=?
+                item=?
+                item>?
+                item>=?)
+  (comparison-procedures item-comparator))
+
+(list-sort item&lt;?
+           (list (make-cd (make-person "The" "Beatles") "Abbey Road")
+                 (make-book (make-person "Jacob" "Grimm") "Deutsche Grammatik")
+                 (make-book (make-person "William" "Shakespeare") "Sonnets")
+                 (make-book (make-person "William" "Shakespeare") "A Midsummer Night’s Dream")
+                 (make-cd (make-person "Bob" "Dylan") "Blonde on Blonde")
+                 (make-cd (make-person "The" "Beatles") "Revolver")))
+;; => ({Book {Person "Jacob" "Grimm"} "Deutsche Grammatik"}
+;;     {Book {Person "William" "Shakespeare"} "Sonnets"}
+;;     {Book {Person "William" "Shakespeare"} "A Midsummer Night’s Dream"}
+;;     {CD {Person "The" "Beatles"} "Abbey Road"}
+;;     {CD {Person "The" "Beatles"} "Revolver"}
+;;     {CD {Person "Bob" "Dylan"} "Blonde on Blonde"})</code></pre>
 
 <h2 id="implementation">Implementation</h2>
 
@@ -86,6 +149,10 @@
 <p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
 
 <p>Marc Nieper-Wißkirchen and John Cowan suggested means of improving the <code>comparison-procedures</code> procedure; as of the current draft, this remains an open issue.
+
+<h2 id=future-work>Future work</h2>
+
+<p>The author hopes that a future SRFI will add a procedure for creating comparators yielding lexicographical order over any sequence type by delegating to a common iteration protocol. An idea to do this using <code>fold</code> procedures foundered on two grounds: the first and more intrinsic one is that <code>fold</code> called on two sequences, one of which is a prefix of the other, cannot determine which of the two is longer, and a sort using <code>fold</code>-based iteration would incorrectly consider them equal; the second is that there is currently an inconsistency among Scheme libraries in what order the <var>kons</var> procedure argument to <code>fold</code> receives the accumulator and the next values in the sequence (compare <a href="https://srfi.schemers.org/srfi-1/srfi-1.html#fold">SRFI 1 <code>fold</code></a> with <a href="https://srfi.schemers.org/srfi-133/srfi-133.html#vector-fold">SRFI 133 <code>vector-fold</code></a>). <a href="https://srfi.schemers.org/srfi-158/srfi-158.html">SRFI 158</a> generators were rejected on the ground that their sequences cannot contain any arbitrary Scheme datum.
 
 <h2 id="copyright">Copyright</h2>
 <p>&copy; 2021 Daphne Preston-Kendal.</p>
