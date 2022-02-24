@@ -55,7 +55,7 @@
 
   <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators, such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
+      <p>Returns a comparator which compares values satisfying the <var>type-test</var>s of any of the given <var>comparator</var>s such that values which satisfy the type test of a given comparator are ordered before any values satisfying the type tests of any comparators that appear to the right of it, and values satisfying the same comparator’s type test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type test is satisfied by the given value. If the equality or ordering predicates or the hash function of any of the given comparators is <code>#f</code>, the corresponding procedure in the product comparator will also be <code>#f</code>.</p>
 
   <dt><code>(comparison-procedures</code> <var>comparator</var><code>)</code> (Procedure)
     <dd>
