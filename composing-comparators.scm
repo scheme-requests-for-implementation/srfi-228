@@ -16,54 +16,77 @@
         ((comparator-hash-function contents-comparator) x))
       #f)))
 
-(define (make-composed-comparator type-test . comparators)
+(define (make-product-comparator . comparators)
+  (let* ((type-tests
+          (delete-duplicates
+           (map comparator-type-test-predicate comparators)
+           eq?))
+         (type-test
+          (lambda (val)
+            (every (lambda (test) (test val)) type-tests))))
+    (make-comparator
+     type-test
+     (if (every comparator-equality-predicate comparators)
+         (lambda (a b)
+           (every (lambda (cmp)
+                    ((comparator-equality-predicate cmp) a b))
+                  comparators))
+         #f)
+     (if (every comparator-ordering-predicate comparators)
+         (lambda (a b)
+           (let loop ((cmps comparators))
+             (cond ((null? cmps) #f)
+                   (((comparator-ordering-predicate (car cmps)) a b) #t)
+                   (((comparator-equality-predicate (car cmps)) a b) (loop (cdr cmps)))
+                   (else #f))))
+         #f)
+     (if (every comparator-hash-function comparators)
+         (lambda (x)
+           (fold bitwise-xor
+                 0
+                 (map (lambda (cmp)
+                        ((comparator-hash-function cmp) x))
+                      comparators)))
+         #f))))
+
+(define (comparator-index comparators val)
+  (list-index
+   (lambda (cmp)
+     ((comparator-type-test-predicate cmp) val))
+   comparators))
+
+(define (make-sum-comparator . comparators)
   (make-comparator
-   type-test
+   (lambda (x)
+     (any
+      (lambda (cmp)
+        ((comparator-type-test-predicate cmp) x))
+      comparators))
    (if (every comparator-equality-predicate comparators)
        (lambda (a b)
-         (every (lambda (cmp)
-                  ((comparator-equality-predicate cmp) a b))
-                comparators))
+         (let ((a-cmp-idx (comparator-index comparators a))
+               (b-cmp-idx (comparator-index comparators b)))
+           (if (not (= a-cmp-idx b-cmp-idx))
+               #f
+               (let ((cmp (list-ref comparators a-cmp-idx)))
+                 ((comparator-equality-predicate cmp) a b)))))
        #f)
    (if (every comparator-ordering-predicate comparators)
        (lambda (a b)
-         (let ((gen (list->generator comparators)))
-           (let loop ((cmp (gen)))
-             (cond ((eof-object? cmp) #f)
-                   (((comparator-ordering-predicate cmp) a b) #t)
-                   (((comparator-equality-predicate cmp) a b) (loop (gen)))
-                   (else #f)))))
+         (let ((a-cmp-idx (comparator-index comparators a))
+               (b-cmp-idx (comparator-index comparators b)))
+           (cond ((< a-cmp-idx b-cmp-idx) #t)
+                 ((> a-cmp-idx b-cmp-idx) #f)
+                 (else
+                  (let ((cmp (list-ref comparators a-cmp-idx)))
+                    ((comparator-ordering-predicate cmp) a b))))))
        #f)
    (if (every comparator-hash-function comparators)
        (lambda (x)
-         (generator-fold bitwise-xor
-                         0
-                         (gmap (lambda (cmp)
-                                 ((comparator-hash-function cmp) x))
-                               (list->generator comparators))))
+         (let ((cmp (find (lambda (cmp) ((comparator-type-test-predicate cmp) x))
+                          comparators)))
+           ((comparator-hash-function cmp) x)))
        #f)))
-
-(define-syntax compose-comparator
-  (syntax-rules ()
-    ((_ type-test (unwrap . more) ...)
-     (make-composed-comparator
-      type-test
-      (let-values (((unwrap cmp) (compose-comparator-form unwrap . more)))
-        (make-wrapper-comparator
-         (comparator-type-test-predicate cmp)
-         unwrap
-         cmp)) ...))))
-
-(define-syntax compose-comparator-form
-  ;; Using this submacro enables enforcement of the correct form with
-  ;; moderately more useful syntax errors than doing it the SRFI 9
-  ;; way, at least within the limited bounds of what one can do for
-  ;; that in syntax-rules.
-  (syntax-rules ()
-    ((_ unwrap) (compose-comparator-form unwrap (make-default-comparator)))
-    ((_ unwrap cmp)
-     (values
-      unwrap cmp))))
 
 (define (comparison-procedures comparator)
   (values
