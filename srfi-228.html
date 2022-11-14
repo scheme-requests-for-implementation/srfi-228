@@ -29,9 +29,9 @@
 
 <h2 id="abstract">Abstract</h2>
 
-<p>Further procedures for defining <a href="https://srfi.schemers.org/srfi-128/srfi-128.html">SRFI 128</a> comparators.
+<p>Further procedures for defining <a href="https://srfi.schemers.org/srfi-128/">SRFI 128</a> comparators.
 
-<p>Best enjoyed in combination with <a href="https://srfi.schemers.org/srfi-162/srfi-162.html">SRFI 162</a>.
+<p>Best enjoyed in combination with <a href="https://srfi.schemers.org/srfi-162/">SRFI 162</a>.
 
 <h2 id="issues">Issues</h2>
 
@@ -135,7 +135,7 @@
 
 <h2 id=future-work>Future work</h2>
 
-<p>The author hopes that a future SRFI will add a procedure for creating comparators yielding lexicographical order over any sequence type by delegating to a common iteration protocol. An idea to do this using <code>fold</code> procedures foundered on two grounds: the first and more intrinsic one is that <code>fold</code> called on two sequences, one of which is a prefix of the other, cannot determine which of the two is longer, and a sort using <code>fold</code>-based iteration would incorrectly consider them equal; the second is that there is currently an inconsistency among Scheme libraries in what order the <var>kons</var> procedure argument to <code>fold</code> receives the accumulator and the next values in the sequence (compare <a href="https://srfi.schemers.org/srfi-1/srfi-1.html#fold">SRFI 1 <code>fold</code></a> with <a href="https://srfi.schemers.org/srfi-133/srfi-133.html#vector-fold">SRFI 133 <code>vector-fold</code></a>). <a href="https://srfi.schemers.org/srfi-158/srfi-158.html">SRFI 158</a> generators were rejected on the ground that their sequences cannot contain any arbitrary Scheme datum.
+<p>The author hopes that a future SRFI will add a procedure for creating comparators yielding lexicographical order over any sequence type by delegating to a common iteration protocol. An idea to do this using <code>fold</code> procedures foundered on two grounds: the first and more intrinsic one is that <code>fold</code> called on two sequences, one of which is a prefix of the other, cannot determine which of the two is longer, and a sort using <code>fold</code>-based iteration would incorrectly consider them equal; the second is that there is currently an inconsistency among Scheme libraries in what order the <var>kons</var> procedure argument to <code>fold</code> receives the accumulator and the next values in the sequence (compare <a href="https://srfi.schemers.org/srfi-1/srfi-1.html#fold">SRFI 1 <code>fold</code></a> with <a href="https://srfi.schemers.org/srfi-133/srfi-133.html#vector-fold">SRFI 133 <code>vector-fold</code></a>). <a href="https://srfi.schemers.org/srfi-158/">SRFI 158</a> generators were rejected on the ground that their sequences cannot contain any arbitrary Scheme datum.
 
 <p>Earlier drafts of this SRFI contained a procedure to convert a SRFI 128 comparator into a set of Scheme comparison procedures. This was dropped because a satisfactory interface, with sufficient efficiency and usability, could not be found. Thanks are due nonetheless to John Cowan and Marc Nieper-Wißkirchen for their suggestions to resolve this issue. Likewise, it is hoped that a future SRFI will respond to this need.
 
