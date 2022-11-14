@@ -83,11 +83,3 @@
                           comparators)))
            ((comparator-hash-function cmp) x)))
        #f)))
-
-(define (comparison-procedures comparator)
-  (values
-   (lambda args (apply <? comparator args))
-   (lambda args (apply <=? comparator args))
-   (lambda args (apply =? comparator args))
-   (lambda args (apply >=? comparator args))
-   (lambda args (apply >? comparator args))))

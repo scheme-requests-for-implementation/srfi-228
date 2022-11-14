@@ -5,6 +5,5 @@
 	  (srfi 151))
   (export make-wrapper-comparator
           make-product-comparator
-          make-sum-comparator
-          comparison-procedures)
+          make-sum-comparator)
   (include "srfi-228.scm"))
