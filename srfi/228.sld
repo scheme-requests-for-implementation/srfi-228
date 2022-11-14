@@ -5,5 +5,4 @@
           make-product-comparator
           make-sum-comparator
           comparison-procedures)
-
-  (include "composing-comparators.scm"))
+  (include "srfi-228.scm"))
