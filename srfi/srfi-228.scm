@@ -84,4 +84,7 @@
          (let ((cmp (%sum-comparator-for comparators x x)))
            ((comparator-hash-function (car cmp)) x)))
        #f)))
+<<<<<<<< HEAD:srfi/composing-comparators.scm
 
+========
+>>>>>>>> 58c55b3dfe6ebdfd8770cd69ac08acda24dc4f50:srfi/srfi-228.scm
