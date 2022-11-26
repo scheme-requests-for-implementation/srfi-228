@@ -67,6 +67,12 @@
          (revolver (make-cd (make-person "The" "Beatles") "Revolver")))
   (test-equal
       equal?
+    (list deutsche-grammatik
+          mnd
+          sonnets
+          abbey-road
+          revolver
+          bob)
     (list-sort
      (lambda (a b) (<? item-comparator a b))
      (list abbey-road
@@ -74,10 +80,4 @@
            sonnets
            mnd
            bob
-           revolver))
-    (list deutsche-grammatik
-          mnd
-          sonnets
-          abbey-road
-          revolver
-          bob))))
+           revolver)))))
