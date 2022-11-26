@@ -53,7 +53,7 @@
   (let ((a-cmp (find-tail (type-tests-for? a) comparators)))
     (if (and a-cmp ((comparator-type-test-predicate (car a-cmp)) b))
         a-cmp
-        (let ((b-cmp (find-tail (type-tests-for? a) comparators)))
+        (let ((b-cmp (find-tail (type-tests-for? b) comparators)))
           (if (and b-cmp ((comparator-type-test-predicate (car b-cmp)) a))
               b-cmp
               #f)))))
@@ -84,7 +84,17 @@
          (let ((cmp (%sum-comparator-for comparators x x)))
            ((comparator-hash-function (car cmp)) x)))
        #f)))
-<<<<<<<< HEAD:srfi/composing-comparators.scm
 
-========
->>>>>>>> 58c55b3dfe6ebdfd8770cd69ac08acda24dc4f50:srfi/srfi-228.scm
+(define one-comparator
+  (make-comparator
+   (lambda (x) #t)
+   (lambda (a b) #t)
+   (lambda (a b) #f)
+   (lambda (x) 0)))
+
+(define zero-comparator
+  (make-comparator
+   (lambda (x) #f)
+   (lambda (a b) (error "can't compare" a b))
+   (lambda (a b) (error "can't compare" a b))
+   (lambda (x) (error "can't hash" x))))
