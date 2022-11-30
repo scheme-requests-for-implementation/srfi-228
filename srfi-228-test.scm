@@ -1,10 +1,10 @@
 (cond-expand
   (chibi
    (import (chibi test)
-	   (scheme base)
+           (scheme base)
            (srfi 1)
-	   (srfi 128)
-	   (only (srfi 132) list-sort))))
+           (srfi 128)
+           (only (srfi 132) list-sort))))
 
 (define-record-type Person
     (make-person first-name last-name)
@@ -21,14 +21,14 @@
   (test-equal eq?
     #t
     (<? person-name-comparator
-	(make-person "John" "Cowan")
-	(make-person "Daphne" "Preston-Kendal")))
+        (make-person "John" "Cowan")
+        (make-person "Daphne" "Preston-Kendal")))
 
   (test-equal eq?
     #t
     (>? person-name-comparator
-	(make-person "Tom" "Smith")
-	(make-person "John" "Smith"))))
+        (make-person "Tom" "Smith")
+        (make-person "John" "Smith"))))
 
 (define-record-type Book
     (make-book author title)
@@ -57,27 +57,27 @@
 
 (test-group "nested"
   (let* ((beatles (make-person "The" "Beatles"))
-	 (abbey-road (make-cd beatles "Abbey Road"))
-	 (deutsche-grammatik
-	  (make-book (make-person "Jacob" "Grimm") "Deutsche Grammatik"))
-	 (sonnets (make-book (make-person "William" "Shakespeare") "Sonnets"))
-	 (mnd (make-book (make-person "William" "Shakespeare")
-			 "A Midsummer Night’s Dream"))
-	 (bob (make-cd (make-person "Bob" "Dylan") "Blonde on Blonde"))
-	 (revolver (make-cd (make-person "The" "Beatles") "Revolver")))
+         (abbey-road (make-cd beatles "Abbey Road"))
+         (deutsche-grammatik
+          (make-book (make-person "Jacob" "Grimm") "Deutsche Grammatik"))
+         (sonnets (make-book (make-person "William" "Shakespeare") "Sonnets"))
+         (mnd (make-book (make-person "William" "Shakespeare")
+                         "A Midsummer Night’s Dream"))
+         (bob (make-cd (make-person "Bob" "Dylan") "Blonde on Blonde"))
+         (revolver (make-cd (make-person "The" "Beatles") "Revolver")))
   (test-equal
       equal?
+    (list deutsche-grammatik
+          mnd
+          sonnets
+          abbey-road
+          revolver
+          bob)
     (list-sort
      (lambda (a b) (<? item-comparator a b))
      (list abbey-road
-	   deutsche-grammatik
-	   sonnets
-	   mnd
-	   bob
-	   revolver))
-    (list deutsche-grammatik
-	  mnd
-	  sonnets
-	  abbey-road
-	  revolver
-	  bob))))
+           deutsche-grammatik
+           sonnets
+           mnd
+           bob
+           revolver)))))

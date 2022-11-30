@@ -17,35 +17,37 @@
       #f)))
 
 (define (make-product-comparator . comparators)
-  (let* ((type-tests
-          (delete-duplicates
-           (map comparator-type-test-predicate comparators)
-           eq?))
-         (type-test
-          (lambda (val)
-            (every (lambda (test) (test val)) type-tests))))
-    (make-comparator
-     type-test
-     (lambda (a b)
-       (every (lambda (cmp)
-                ((comparator-equality-predicate cmp) a b))
-              comparators))
-     (if (every comparator-ordered? comparators)
+  (if (null? comparators)
+      one-comparator
+      (let* ((type-tests
+              (delete-duplicates
+               (map comparator-type-test-predicate comparators)
+               eq?))
+             (type-test
+              (lambda (val)
+                (every (lambda (test) (test val)) type-tests))))
+        (make-comparator
+         type-test
          (lambda (a b)
-           (let loop ((cmps comparators))
-             (cond ((null? cmps) #f)
-                   (((comparator-ordering-predicate (car cmps)) a b) #t)
-                   (((comparator-equality-predicate (car cmps)) a b) (loop (cdr cmps)))
-                   (else #f))))
-         #f)
-     (if (every comparator-hashable? comparators)
-         (lambda (x)
-           (fold bitwise-xor
-                 0
-                 (map (lambda (cmp)
-                        ((comparator-hash-function cmp) x))
-                      comparators)))
-         #f))))
+           (every (lambda (cmp)
+                    ((comparator-equality-predicate cmp) a b))
+                  comparators))
+         (if (every comparator-ordered? comparators)
+             (lambda (a b)
+               (let loop ((cmps comparators))
+                 (cond ((null? cmps) #f)
+                       (((comparator-ordering-predicate (car cmps)) a b) #t)
+                       (((comparator-equality-predicate (car cmps)) a b) (loop (cdr cmps)))
+                       (else #f))))
+             #f)
+         (if (every comparator-hashable? comparators)
+             (lambda (x)
+               (fold bitwise-xor
+                     0
+                     (map (lambda (cmp)
+                            ((comparator-hash-function cmp) x))
+                          comparators)))
+             #f)))))
 
 (define (comparator-index comparators val)
   (list-index
@@ -83,3 +85,17 @@
                           comparators)))
            ((comparator-hash-function cmp) x)))
        #f)))
+
+(define comparator-one
+  (make-comparator
+   (lambda (x) #t)
+   (lambda (a b) #t)
+   (lambda (a b) #f)
+   (lambda (x) 0)))
+
+(define comparator-zero
+  (make-comparator
+   (lambda (x) #f)
+   (lambda (a b) (error "can't compare" a b))
+   (lambda (a b) (error "can't compare" a b))
+   (lambda (x) (error "can't hash" x))))

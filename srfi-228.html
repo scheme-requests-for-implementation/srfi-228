@@ -7,8 +7,14 @@
   <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
   <style>
     .issue {
-    background-color: pink;
-    padding: 0.5em;
+        background-color: pink;
+        padding: 0.5em;
+    }
+
+    var {
+        font-family: serif;
+        font-style: italic;
+        font-size-adjust: ex-height;
     }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1"></head>
@@ -46,6 +52,8 @@
 
 <p>All identifiers defined in this SRFI are exported in the <code>(srfi 228)</code> library. However, as in the case of SRFI 162, it is hoped and intended that they will simply be added to the existing comparator libraries of RnRSes and Scheme implementations, rather than being in a separate library.
 
+<h3 id=constructors>Constructors</h3>
+
 <dl>
   <dt><code>(make-wrapper-comparator</code> <var>type-test</var> <var>unwrap</var> <var>contents-comparator</var><code>)</code> (Procedure)
     <dd>
@@ -53,11 +61,53 @@
 
   <dt><code>(make-product-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the type tests of all of the given <var>comparator</var>s by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the product comparator also considers them equal. The hash function of the product comparator hashes together the results of all the given comparators in an implementation-defined way. If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the product comparator will also not exist.</p>
+      <p>Returns a comparator which compares values satisfying the type tests of all of the given <var>comparator</var>s by comparing them with each of the given comparators in turn, left to right, and returning the result of the first non-equal comparison. If all the given comparators consider two values equal, the product comparator also considers them equal.</p>
+      <p>The product comparator is formally defined as follows. The domain of the product comparator is the intersection of the domains of all the given <var>comparator</var>s. The product comparator is then a comparator whose
+      <ul>
+        <li><b>type test</b> returns <code>#t</code> if all of the <var>comparator</var>s’ type tests are satisfied by the given value, otherwise returning <code>#f</code>;
+        <li><b>equality predicate</b> returns <code>#t</code> if the given values are equal according to the equality predicates of all the <var>comparator</var>s, otherwise returning <code>#f</code>;
+        <li><b>ordering predicate</b>, given two arguments <var>a b</var>, compared them using each of the <var>comparator</var>s from left to right thus:
+          <ul>
+            <li>if the current comparator’s ordering predicate returns true, the ordering predicate of the product comparator returns <code>#t</code>;
+            <li>if the current comparator’s equality predicate returns true, the next comparator is checked; or
+            <li>if there are no more comparators left, the ordering predicate of the product comparator returns <code>#f</code>;
+          </ul>
+          and whose
+        <li><b>hash function</b> hashes together the results of applying each of the <var>comparator</var>s’ hash functions to the given value in an implementation-defined way.
+      </ul>
+      <p>If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the product comparator will also not exist.</p>
+      <p>If there are no <var>comparator</var>s given, this procedure returns the <code>comparator-one</code>, or a new comparator with identical behaviour to it.</p>
+      <p><i>Note:</i> Despite the name, this procedure actually creates comparators which are more general than a comparator over a product type, because each of the given <var>comparator</var>s has its own type test.</p>
 
   <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
-      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators, such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator. The hash function of the sum comparator returns the value of the hash function of the leftmost comparator whose type-test is satisfied by the given value. If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the sum comparator will also not exist.</p>
+      <p>Returns a comparator which compares values satisfying the type-tests of any of the given comparators, such that values which satisfy the type-test of a given comparator are ordered before any values satisfying the type-tests of any comparators appear to the right of it, and values satisfying the same comparator’s type-test are tested for ordering and equality according that comparator.</p>
+      <p>The sum comparator is formally defined as follows. The domain of the sum comparator is the union of the domains of all the given <var>comparator</var>s. The <dfn>relevant comparator</dfn> for a given value is the leftmost of the given <var>comparator</var>s whose type test answers true for that value. The sum comparator is then a comparator whose
+      <ul>
+        <li><b>type test</b> returns <code>#t</code> if there exists a relevant comparator for the given value, or otherwise <code>#f</code>;
+        <li><b>equality predicate</b> finds the relevant comparators for both of the values it is given. If the values have two different relevant comparators, it returns <code>#f</code>; otherwise, it returns the value of the equality predicate of the relevant comparator applied to the two values.
+        <li><b>ordering predicate</b> finds the relevant comparators for both of the values (<var>a b</var>) it is given. If the relevant comparator for <var>a</var> is to the left of the relevant comparator for <var>b</var>, it returns <var>#t</var>. If the two values have the same relevant comparator, it returns the value returned by the ordering predicate of that comparator applied to the two values. In all other cases, returns <var>#f</var>.
+        <li><b>hash function</b> returns the value returned by the hash function of the relevant comparator for the value it is given.
+      </ul>
+      <p>If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the sum comparator will also not exist.</p>
+      <p>If there are no <var>comparator</var>s given, this procedure returns the <code>comparator-zero</code>, or a new comparator with identical behaviour to it.</p>
+</dl>
+
+<h3 id=base-cases>Base Cases</h3>
+
+<dl>
+  <dt><code>comparator-one</code> (Comparator)
+    <dd>
+      <p>A comparator which has all values in its domain and considers all values to be equal. Specifically, its:
+      <ul>
+        <li><b>type test</b> always returns <code>#t</code>;
+        <li><b>equality predicate</b> always returns <code>#t</code>;
+        <li><b>ordering predicate</b> always returns <code>#f</code>; and whose
+        <li><b>hash function</b> always returns <code>0</code>.
+      </ul>
+  <dt><code>comparator-zero</code> (Comparator)
+    <dd>
+      <p>A comparator whose type test always returns <code>#f</code>. Since this comparator has no values in its domain, it is always an error to invoke its equality predicate, ordering predicate, or hash function.
 </dl>
 
 <h2 id=examples>Examples</h2>
@@ -132,9 +182,13 @@
 
 <p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
 
-<p>Jakob Wuhrer pointed out bugs in the sample implementation.
+<p>Shiro Kawai requested a clearer definition of the individual procedures of sum and product comparators. He also suggested defining the base cases of <code>make-product-comparator</code> and <code>make-sum-comparator</code>; Jakob Wuhrer produced a detailed analysis showing the correct behaviour of the base cases <code>one-comparator</code> and <code>zero-comparator</code>, and also pointed out bugs in the sample implementation.
 
-<h2 id=future-work>Future work</h2>
+<p>Lassi Kortela and Marc Nieper-Wißkirchen pointed out that the names <code>make-product-comparator</code> and <code>make-sum-comparator</code> are confusing and, in the former case, slightly incorrect in the analogy to product types of type theory. However, since nobody on the list could come up with a better name which makes clear what the two comparator compositions do, and their relationship to one another, the names were retained.
+
+<p>Arthur Gleckler was extraordinarily patient. He also turned the examples above into the initial version of the test suite for this SRFI’s sample implementation.
+
+<h2 id=future-work>Future Work</h2>
 
 <p>The author hopes that a future SRFI will add a procedure for creating comparators yielding lexicographical order over any sequence type by delegating to a common iteration protocol. An idea to do this using <code>fold</code> procedures foundered on two grounds: the first and more intrinsic one is that <code>fold</code> called on two sequences, one of which is a prefix of the other, cannot determine which of the two is longer, and a sort using <code>fold</code>-based iteration would incorrectly consider them equal; the second is that there is currently an inconsistency among Scheme libraries in what order the <var>kons</var> procedure argument to <code>fold</code> receives the accumulator and the next values in the sequence (compare <a href="https://srfi.schemers.org/srfi-1/srfi-1.html#fold">SRFI 1 <code>fold</code></a> with <a href="https://srfi.schemers.org/srfi-133/srfi-133.html#vector-fold">SRFI 133 <code>vector-fold</code></a>). <a href="https://srfi.schemers.org/srfi-158/">SRFI 158</a> generators were rejected on the ground that their sequences cannot contain any arbitrary Scheme datum.
 
