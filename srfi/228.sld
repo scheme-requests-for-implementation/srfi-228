@@ -7,6 +7,6 @@
           make-product-comparator
           make-sum-comparator
 
-          one-comparator
-          zero-comparator)
+          comparator-one
+          comparator-zero)
   (include "srfi-228.scm"))

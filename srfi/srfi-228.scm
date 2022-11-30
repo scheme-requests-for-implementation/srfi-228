@@ -49,54 +49,51 @@
                           comparators)))
              #f)))))
 
-(define (%sum-comparator-for comparators a b)
-  (define (type-tests-for? x)
-    (lambda (cmp) ((comparator-type-test-predicate cmp) x)))
-  (let ((a-cmp (find-tail (type-tests-for? a) comparators)))
-    (if (and a-cmp ((comparator-type-test-predicate (car a-cmp)) b))
-        a-cmp
-        (let ((b-cmp (find-tail (type-tests-for? b) comparators)))
-          (if (and b-cmp ((comparator-type-test-predicate (car b-cmp)) a))
-              b-cmp
-              #f)))))
+(define (comparator-index comparators val)
+  (list-index
+   (lambda (cmp)
+     ((comparator-type-test-predicate cmp) val))
+   comparators))
 
 (define (make-sum-comparator . comparators)
-  (if (null? comparators)
-      zero-comparator
-      (make-comparator
-       (lambda (x)
-         (any
-          (lambda (cmp)
-            ((comparator-type-test-predicate cmp) x))
-          comparators))
+  (make-comparator
+   (lambda (x)
+     (any
+      (lambda (cmp)
+        ((comparator-type-test-predicate cmp) x))
+      comparators))
+   (lambda (a b)
+     (let ((a-cmp-idx (comparator-index comparators a))
+           (b-cmp-idx (comparator-index comparators b)))
+       (if (not (= a-cmp-idx b-cmp-idx))
+           #f
+           (let ((cmp (list-ref comparators a-cmp-idx)))
+             ((comparator-equality-predicate cmp) a b)))))
+   (if (every comparator-ordered? comparators)
        (lambda (a b)
-         (let ((cmp (%sum-comparator-for comparators a b)))
-           (if cmp
-               ((comparator-equality-predicate (car cmp)) a b)
-               #f)))
-       (if (every comparator-ordered? comparators)
-           (lambda (a b)
-             (let ((cmp (%sum-comparator-for comparators a b)))
-               (if cmp
-                   ((comparator-ordering-predicate (car cmp)) a b)
-                   (let ((a-cmp (%sum-comparator-for comparators a a))
-                         (b-cmp (%sum-comparator-for comparators b b)))
-                     (>= (length a-cmp) (length b-cmp))))))
-           #f)
-       (if (every comparator-hashable? comparators)
-           (lambda (x)
-             (let ((cmp (%sum-comparator-for comparators x x)))
-               ((comparator-hash-function (car cmp)) x)))
-           #f))))
+         (let ((a-cmp-idx (comparator-index comparators a))
+               (b-cmp-idx (comparator-index comparators b)))
+           (cond ((< a-cmp-idx b-cmp-idx) #t)
+                 ((> a-cmp-idx b-cmp-idx) #f)
+                 (else
+                  (let ((cmp (list-ref comparators a-cmp-idx)))
+                    ((comparator-ordering-predicate cmp) a b))))))
+       #f)
+   (if (every comparator-hashable? comparators)
+       (lambda (x)
+         (let ((cmp (find (lambda (cmp) ((comparator-type-test-predicate cmp) x))
+                          comparators)))
+           ((comparator-hash-function cmp) x)))
+       #f)))
 
-(define one-comparator
+(define comparator-one
   (make-comparator
    (lambda (x) #t)
    (lambda (a b) #t)
    (lambda (a b) #f)
    (lambda (x) 0)))
 
-(define zero-comparator
+(define comparator-zero
   (make-comparator
    (lambda (x) #f)
    (lambda (a b) (error "can't compare" a b))
