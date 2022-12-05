@@ -86,7 +86,7 @@
       <ul>
         <li><b>type test</b> returns <code>#t</code> if there exists a relevant comparator for the given value, or otherwise <code>#f</code>;
         <li><b>equality predicate</b> finds the relevant comparators for both of the values it is given. If the values have two different relevant comparators, it returns <code>#f</code>; otherwise, it returns the value of the equality predicate of the relevant comparator applied to the two values.
-        <li><b>ordering predicate</b> finds the relevant comparators for both of the values (<var>a b</var>) it is given. If the relevant comparator for <var>a</var> is to the left of the relevant comparator for <var>b</var>, it returns <var>#t</var>. If the two values have the same relevant comparator, it returns the value returned by the ordering predicate of that comparator applied to the two values. In all other cases, returns <var>#f</var>.
+        <li><b>ordering predicate</b> finds the relevant comparators for both of the values (<var>a b</var>) it is given. If the relevant comparator for <var>a</var> is to the left of the relevant comparator for <var>b</var>, it returns <code>#t</code>. If the two values have the same relevant comparator, it returns the value returned by the ordering predicate of that comparator applied to the two values. In all other cases, returns <code>#f</code>.
         <li><b>hash function</b> returns the value returned by the hash function of the relevant comparator for the value it is given.
       </ul>
       <p>If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the sum comparator will also not exist.</p>
@@ -182,7 +182,7 @@
 
 <p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
 
-<p>Shiro Kawai requested a clearer definition of the individual procedures of sum and product comparators. He also suggested defining the base cases of <code>make-product-comparator</code> and <code>make-sum-comparator</code>; Jakob Wuhrer produced a detailed analysis showing the correct behaviour of the base cases <code>one-comparator</code> and <code>zero-comparator</code>, and also pointed out bugs in the sample implementation.
+<p>Shiro Kawai requested a clearer definition of the individual procedures of sum and product comparators. He also suggested defining the base cases of <code>make-product-comparator</code> and <code>make-sum-comparator</code>; Jakob Wuhrer produced a detailed analysis showing the correct behaviour of the base cases <code>comparator-one</code> and <code>comparator-zero</code>, and also pointed out bugs in the sample implementation.
 
 <p>Lassi Kortela and Marc Nieper-Wißkirchen pointed out that the names <code>make-product-comparator</code> and <code>make-sum-comparator</code> are confusing and, in the former case, slightly incorrect in the analogy to product types of type theory. However, since nobody on the list could come up with a better name which makes clear what the two comparator compositions do, and their relationship to one another, the names were retained.
 
