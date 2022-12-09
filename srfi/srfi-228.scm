@@ -18,7 +18,7 @@
 
 (define (make-product-comparator . comparators)
   (if (null? comparators)
-      one-comparator
+      comparator-one
       (let* ((type-tests
               (delete-duplicates
                (map comparator-type-test-predicate comparators)
@@ -56,35 +56,37 @@
    comparators))
 
 (define (make-sum-comparator . comparators)
-  (make-comparator
-   (lambda (x)
-     (any
-      (lambda (cmp)
-        ((comparator-type-test-predicate cmp) x))
-      comparators))
-   (lambda (a b)
-     (let ((a-cmp-idx (comparator-index comparators a))
-           (b-cmp-idx (comparator-index comparators b)))
-       (if (not (= a-cmp-idx b-cmp-idx))
-           #f
-           (let ((cmp (list-ref comparators a-cmp-idx)))
-             ((comparator-equality-predicate cmp) a b)))))
-   (if (every comparator-ordered? comparators)
+  (if (null? comparators)
+      comparator-zero
+      (make-comparator
+       (lambda (x)
+         (any
+          (lambda (cmp)
+            ((comparator-type-test-predicate cmp) x))
+          comparators))
        (lambda (a b)
          (let ((a-cmp-idx (comparator-index comparators a))
                (b-cmp-idx (comparator-index comparators b)))
-           (cond ((< a-cmp-idx b-cmp-idx) #t)
-                 ((> a-cmp-idx b-cmp-idx) #f)
-                 (else
-                  (let ((cmp (list-ref comparators a-cmp-idx)))
-                    ((comparator-ordering-predicate cmp) a b))))))
-       #f)
-   (if (every comparator-hashable? comparators)
-       (lambda (x)
-         (let ((cmp (find (lambda (cmp) ((comparator-type-test-predicate cmp) x))
-                          comparators)))
-           ((comparator-hash-function cmp) x)))
-       #f)))
+           (if (not (= a-cmp-idx b-cmp-idx))
+               #f
+               (let ((cmp (list-ref comparators a-cmp-idx)))
+                 ((comparator-equality-predicate cmp) a b)))))
+       (if (every comparator-ordered? comparators)
+           (lambda (a b)
+             (let ((a-cmp-idx (comparator-index comparators a))
+                   (b-cmp-idx (comparator-index comparators b)))
+               (cond ((< a-cmp-idx b-cmp-idx) #t)
+                     ((> a-cmp-idx b-cmp-idx) #f)
+                     (else
+                      (let ((cmp (list-ref comparators a-cmp-idx)))
+                        ((comparator-ordering-predicate cmp) a b))))))
+           #f)
+       (if (every comparator-hashable? comparators)
+           (lambda (x)
+             (let ((cmp (find (lambda (cmp) ((comparator-type-test-predicate cmp) x))
+                              comparators)))
+               ((comparator-hash-function cmp) x)))
+           #f))))
 
 (define comparator-one
   (make-comparator
