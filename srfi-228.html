@@ -68,7 +68,7 @@
       <ul>
         <li><b>type test</b> returns <code>#t</code> if all of the <var>comparator</var>s’ type tests are satisfied by the given value, otherwise returning <code>#f</code>;
         <li><b>equality predicate</b> returns <code>#t</code> if the given values are equal according to the equality predicates of all the <var>comparator</var>s, otherwise returning <code>#f</code>;
-        <li><b>ordering predicate</b>, given two arguments <var>a b</var>, compared them using each of the <var>comparator</var>s from left to right thus:
+        <li><b>ordering predicate</b>, given two arguments <var>a b</var>, compares them using each of the <var>comparator</var>s from left to right thus:
           <ul>
             <li>if the current comparator’s ordering predicate returns true, the ordering predicate of the product comparator returns <code>#t</code>;
             <li>if the current comparator’s equality predicate returns true, the next comparator is checked; or
@@ -79,7 +79,7 @@
       </ul>
       <p>If the ordering predicate or the hash function of any of the given comparators does not exist, the corresponding procedure in the product comparator will also not exist.</p>
       <p>If there are no <var>comparator</var>s given, this procedure returns the <code>comparator-one</code>, or a new comparator with identical behaviour to it.</p>
-      <p><i>Note:</i> This procedure actually creates comparators which are more general than a comparator over a product type – for example, because each <var>comparator</var> has its own type test, it can be used to combine a comparator for one type with that of a subtype; or if more than one <var>comparator</var> looks at the same component of a type. However, in most cases it is expected that this procedure will be used together with <code>make-wrapper-comparator</code> to create comparators over record types i.e. product types, hence the name.</p>
+      <p><i>Note:</i> This procedure actually creates comparators which are more general than a comparator over a product type – for example, because each <var>comparator</var> has its own type test, it can be used to combine a comparator for one type with that of a subtype; or if more than one <var>comparator</var> looks at the same component of a type. However, in most cases it is expected that this procedure will be used together with <code>make-wrapper-comparator</code> to create comparators over record types, i.e. product types, hence the name.</p>
 
   <dt><code>(make-sum-comparator</code> <var>comparator</var> ... <code>)</code> (Procedure)
     <dd>
@@ -184,7 +184,7 @@
 
 <p><code>make-sum-comparator</code>, and by extension the inspiration for the name of <code>make-product-comparator</code>, is originally from Adam Nelson’s Schemepunk.
 
-<p>Shiro Kawai requested a clearer definition of the individual procedures of sum and product comparators. He also suggested defining the base cases of <code>make-product-comparator</code> and <code>make-sum-comparator</code>; Jakob Wuhrer produced a detailed analysis showing the correct behaviour of the base cases <code>comparator-one</code> and <code>comparator-zero</code>, and also pointed out bugs in the sample implementation.
+<p>Shiro Kawai requested a clearer definition of the individual procedures of sum and product comparators. He also suggested defining the base cases of <code>make-product-comparator</code> and <code>make-sum-comparator</code>. Jakob Wuhrer produced a detailed analysis showing the correct behaviour of the base cases <code>comparator-one</code> and <code>comparator-zero</code>, and also pointed out bugs in the sample implementation.
 
 <p>Lassi Kortela and Marc Nieper-Wißkirchen pointed out that the names <code>make-product-comparator</code> and <code>make-sum-comparator</code> are confusing and, in the former case, slightly incorrect in the analogy to product types of type theory. However, since nobody on the list could come up with a better name which makes clear what the two comparator compositions do, and their relationship to one another, the names were retained.
 
