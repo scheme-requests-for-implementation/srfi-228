@@ -9,7 +9,7 @@ keywords: [[https://srfi.schemers.org/?keywords=comparison][Comparison]]
 
 This repository hosts [[https://srfi.schemers.org/srfi-228/][SRFI 228]]: Composing Comparators, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
-This SRFI is in /draft/ status.
+This SRFI is in /final/ status.
 See also [[/srfi-128/][SRFI 128: Comparators (reduced)]] and [[/srfi-162/][SRFI 162: Comparators sublibrary]].
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-228/srfi-228.html][SRFI Document]].
 
