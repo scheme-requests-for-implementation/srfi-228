@@ -1,4 +1,6 @@
 
+# SPDX-FileCopyrightText: 2024 Arthur A. Gleckler
+# SPDX-License-Identifier: MIT
 * SRFI 228: Composing Comparators
 
 ** by Daphne Preston-Kendal
@@ -6,6 +8,8 @@
 
 
 keywords: [[https://srfi.schemers.org/?keywords=comparison][Comparison]]
+
+library-name: composing-comparators
 
 This repository hosts [[https://srfi.schemers.org/srfi-228/][SRFI 228]]: Composing Comparators, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
