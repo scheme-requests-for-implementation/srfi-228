@@ -13,7 +13,8 @@
        #f)
   (if (comparator-hash-function contents-comparator)
       (lambda (x)
-        ((comparator-hash-function contents-comparator) x))
+        ((comparator-hash-function contents-comparator)
+	 (unwrap x)))
       #f)))
 
 (define (make-product-comparator . comparators)

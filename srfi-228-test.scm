@@ -30,6 +30,11 @@
         (make-person "Tom" "Smith")
         (make-person "John" "Smith"))))
 
+(test-group "hashing"
+  (test-assert
+   (= (comparator-hash person-name-comparator (make-person "Tom" "Smith"))
+      (comparator-hash person-name-comparator (make-person "Tom" "smith")))))
+
 (define-record-type Book
     (make-book author title)
     book?
